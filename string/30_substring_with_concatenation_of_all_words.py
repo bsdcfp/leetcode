@@ -17,82 +17,56 @@
 #   words = ["word","good","best","word"]
 # Output: []
 
-from itertools import combinations
-from itertools import permutations
 class Solution:
     def findSubstring(self, s: str, words: list) -> list:
         res = []
-        pattern_list = self._get_words_concatenation(words)
-        for pattern in pattern_list:
-            res += self._KMPMatch(s, pattern)
-        print(list(set(res)))
+        if not s or not words or not words[0]:
+            return res
+        step_len = len(words[0])
+        words_dict = self._words_count(words)
+        total_len = step_len*len(words)
+        for i in range(len(s)):
+            # print(i)
+            target = s[i:i+total_len]
+            if len(target) < total_len:
+                break
+            if self._split_match(target, words_dict, step_len):
+                res.append(i)
+        return res
 
-    def _generate_pmt(self, string):
-        """对模式串的字串，计算最大公共元素长度，获得最大长度表"""
-        patterns = []
-        for i in range(len(string)):
-            patterns.append(string[0:i+1])
-        # print(patterns)
-        max_common = []
-        for p in patterns:
-            prefixs, suffixs = set([]), set([])
-            size = len(p)
-            for i in range(size-1):
-                prefixs.add(p[0:i+1])
-                suffixs.add(p[-i-1:])
-            # print(prefixs, suffixs)
-            max_common.append(self._get_max_len(prefixs & suffixs))
-        return max_common 
+    def _words_count(self, words):
+        wdict = {}
+        for w in words:
+            if w in wdict:
+                wdict[w] += 1
+            else:
+                wdict[w] = 1
+        return wdict
 
-    def _get_max_len(self, data: set) -> int:
-        max_len = 0
-        for s in data:
-            if max_len < len(s):
-                max_len = len(s) 
-        return max_len 
+    def _split_match(self, target, words_dict, step_len):
+        tmp = {}
+        tmp.update(words_dict)
+        for i in range(0, len(target), step_len):
+            word = target[i:i+step_len]
+            if word not in tmp:
+                return False
+            else:
+                count = tmp.get(word)
+                if count-1:
+                    tmp[word] = count -1
+                else:
+                    tmp.pop(word)
+        # print(count, target, tmp)
+        return True if not tmp else False
+            
 
-    def _get_next(self, max_common):
-        next = [-1]
-        next.extend(max_common[0:-1])
-        return next
-    
-    def _get_next_2(self, max_common):
-        next = []
-        for i in range(len(max_common)):
-            print(i, i-max_common[i])
-            next.append(i-max_common[i])
-        return next
-    
-    def _KMPMatch(self, target, pattern):
-        start, cur = 0, 0
-        mres = []
-        next = self._get_next(self._generate_pmt(pattern))
-        for i in range(len(target)):
-            for j in range(len(pattern)):
-                if target[i] != pattern[j]:
-                    i += next[j]
-                    start = i
-                    break
-                if j == len(pattern)-1:
-                    print(start)
-                    mres.append(start)
-                if i < len(target)-1:
-                    i += 1
-                    j += 1
-        return mres
-
-    def _get_words_concatenation(self, words):
-        return [''.join(item) for item in list(permutations(words, len(words)))]
 
 s = Solution()
-# print(s._get_words_concatenation(["word","good","best","word"]))
-# print(s._get_words_concatenation( ["foo","bar"]))
-# print(s._generate_pmt('ABC'))
-# print(s._generate_pmt('ABCD'))
-# print(s._generate_pmt('ABCDA'))
-# print(s._generate_pmt('ABCDABC'))
-# print(s._get_next(s._generate_pmt('ABCDABD')))
-# print(s._get_next_2(s._generate_pmt('ABCDABD')))
-# s.findSubstring("barfoothefoobarman", ["foo","bar"])
-# s.findSubstring("wordgoodgoodgoodbestword", ["word","good","best","word"])
-s._KMPMatch("barfoothefoobarman", "bar")
+print(s.findSubstring("pjzkrkevzztxductzzxmxsvwjkxpvukmfjywwetvfnujhweiybwvvsrfequzkhossmootkmyxgjgfordrpapjuunmqnxxdrqrfgkrsjqbszgiqlcfnrpjlcwdrvbumtotzylshdvccdmsqoadfrpsvnwpizlwszrtyclhgilklydbmfhuywotjmktnwrfvizvnmfvvqfiokkdprznnnjycttprkxpuykhmpchiksyucbmtabiqkisgbhxngmhezrrqvayfsxauampdpxtafniiwfvdufhtwajrbkxtjzqjnfocdhekumttuqwovfjrgulhekcpjszyynadxhnttgmnxkduqmmyhzfnjhducesctufqbumxbamalqudeibljgbspeotkgvddcwgxidaiqcvgwykhbysjzlzfbupkqunuqtraxrlptivshhbihtsigtpipguhbhctcvubnhqipncyxfjebdnjyetnlnvmuxhzsdahkrscewabejifmxombiamxvauuitoltyymsarqcuuoezcbqpdaprxmsrickwpgwpsoplhugbikbkotzrtqkscekkgwjycfnvwfgdzogjzjvpcvixnsqsxacfwndzvrwrycwxrcismdhqapoojegggkocyrdtkzmiekhxoppctytvphjynrhtcvxcobxbcjjivtfjiwmduhzjokkbctweqtigwfhzorjlkpuuliaipbtfldinyetoybvugevwvhhhweejogrghllsouipabfafcxnhukcbtmxzshoyyufjhzadhrelweszbfgwpkzlwxkogyogutscvuhcllphshivnoteztpxsaoaacgxyaztuixhunrowzljqfqrahosheukhahhbiaxqzfmmwcjxountkevsvpbzjnilwpoermxrtlfroqoclexxisrdhvfsindffslyekrzwzqkpeocilatftymodgztjgybtyheqgcpwogdcjlnlesefgvimwbxcbzvaibspdjnrpqtyeilkcspknyylbwndvkffmzuriilxagyerjptbgeqgebiaqnvdubrtxibhvakcyotkfonmseszhczapxdlauexehhaireihxsplgdgmxfvaevrbadbwjbdrkfbbjjkgcztkcbwagtcnrtqryuqixtzhaakjlurnumzyovawrcjiwabuwretmdamfkxrgqgcdgbrdbnugzecbgyxxdqmisaqcyjkqrntxqmdrczxbebemcblftxplafnyoxqimkhcykwamvdsxjezkpgdpvopddptdfbprjustquhlazkjfluxrzopqdstulybnqvyknrchbphcarknnhhovweaqawdyxsqsqahkepluypwrzjegqtdoxfgzdkydeoxvrfhxusrujnmjzqrrlxglcmkiykldbiasnhrjbjekystzilrwkzhontwmehrfsrzfaqrbbxncphbzuuxeteshyrveamjsfiaharkcqxefghgceeixkdgkuboupxnwhnfigpkwnqdvzlydpidcljmflbccarbiegsmweklwngvygbqpescpeichmfidgsjmkvkofvkuehsmkkbocgejoiqcnafvuokelwuqsgkyoekaroptuvekfvmtxtqshcwsztkrzwrpabqrrhnlerxjojemcxel", ["dhvf","sind","ffsl","yekr","zwzq","kpeo","cila","tfty","modg","ztjg","ybty","heqg","cpwo","gdcj","lnle","sefg","vimw","bxcb"]))
+# print(s.findSubstring("barfoothefoobarman", ["foo","bar"])) # [0, 9]
+# print(s.findSubstring("wordgoodgoodgoodbestword", ["word","good","best","word"])) # []
+# print(s.findSubstring("barfoofoobarthefoobarman", ["bar","foo","the"])) # [6, 9, 12]
+# print(s.findSubstring("a", ["a", "a"])) # []
+# print(s.findSubstring("aaa", ["a", "a"])) # [0, 1]
+# print(s.findSubstring("", [])) # []
+# print(s.findSubstring("a", [])) # []
