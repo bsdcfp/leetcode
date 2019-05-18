@@ -25,19 +25,39 @@
 # ]
 class Solution:
   def combinationSum(self, candidates: list, target: int) -> list:
-    self.res = []
-    self._calculate(candidates, target, 0)
-    print(self.res)
+    self.res = set([])
+    for c in candidates:
+      cur_sum = [] # 第一个元素表示所有元素的和
+      cur_sum.append(c)
+      cur_sum.append(c)
+      self._calculate(candidates, target, cur_sum)
+    print(list(map(lambda x: eval(x), self.res)))
+
   def _calculate(self, candidates, target, cur_sum):
     for c in candidates:
-      # cur_sum += c
-      if (cur_sum+c) == target:
-        self.res.append(cur_sum+c)
-      elif (cur_sum+c) < target:
-        self._calculate(candidates, target, cur_sum+c)
+      new_sum = []
+      new_sum.extend(cur_sum)
+      # print(new_sum , c)
+      if new_sum[0] == target:
+        # sorted(new_sum, reverse=True)
+        new_sum.sort(reverse=True)
+        self.res.add(str(new_sum[1:]))
+      elif (new_sum[0]+c) == target:
+        # print(new_sum, target)
+        new_sum.append(c)
+        new_sum[0] += c
+        print(new_sum, 'before')
+        new_sum.sort(reverse=True)
+        print(new_sum, 'after')
+        self.res.add(str(new_sum[1:]))
+      elif (new_sum[0]+c) < target:
+        new_sum[0] += c
+        new_sum.append(c)
+        self._calculate(candidates, target, new_sum)
 
 s = Solution()
-s.combinationSum( [2,3,6,7], 7)
+# s.combinationSum([2,3,6,7], 7)
+s.combinationSum([2,3,5], 8)
         
 
         
